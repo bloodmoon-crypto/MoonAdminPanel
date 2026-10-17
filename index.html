@@ -225,26 +225,19 @@
 </div>
 
 <script>
-    // ==========================================
-    // SECRET CONFIGURATION
-    // Change this salt to match your Smali code!
-    // Default: 0x270F (9999)
-    // ==========================================
-    const SECRET_SALT = 0x270F; 
-
     function generateMasterKey() {
         const btn = document.getElementById('genBtn');
         btn.disabled = true;
         btn.innerText = "GENERATING...";
 
-        // Fake delay to look like a secure server calculation
+        // Fake delay for the "secure" feel
         setTimeout(() => {
             try {
-                // 1. Get Days since epoch (This is the 24-hour lock)
-                const days = Math.floor(Date.now() / 86400000);
+                // 1. Get Days since epoch
+                const day = Math.floor(Date.now() / 86400000);
                 
-                // 2. Add Salt
-                let seed = days + SECRET_SALT;
+                // 2. Add Secret Salt (0x270F = 9999)
+                let seed = day + 0x270F;
                 let currentSeed = seed;
 
                 // 3. Character set
@@ -255,10 +248,9 @@
 
                 for (let i = 0; i < 4; i++) {
                     for (let j = 0; j < 4; j++) {
-                        currentSeed += 1;
-                        let x = Math.sin(currentSeed) * 10000;
-                        let r = Math.floor((Math.abs(x - Math.floor(x))) * chars.length);
-                        result += chars.charAt(r);
+                        let idx = (currentSeed & 0x7) + i + j + 1;
+                        result += chars.charAt(idx % 32);
+                        currentSeed += 0x4E6D;
                     }
                     if (i < 3) result += "-";
                 }
@@ -299,10 +291,8 @@
     }
 
     function startTimer() {
-        // Calculate exactly when the day ends
         const now = new Date();
         const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-        const timeUntilMidnight = nextDay.getTime() - now.getTime();
 
         let countdownEl = document.getElementById('countdown');
 
@@ -311,7 +301,6 @@
             let diff = nextDay.getTime() - now.getTime();
 
             if (diff <= 0) {
-                // Midnight hit. The key is now dead.
                 countdownEl.innerText = "EXPIRED";
                 countdownEl.style.color = "#ff3366";
                 return;
@@ -326,7 +315,6 @@
                 String(minutes).padStart(2, '0') + ":" + 
                 String(seconds).padStart(2, '0');
             
-            // Update every second
             setTimeout(updateTimer, 1000);
         }
 
