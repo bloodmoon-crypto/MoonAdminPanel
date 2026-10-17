@@ -1,63 +1,131 @@
-.method static calculateUniversalKey()Ljava/lang/String;
-    .registers 8
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UKM | Master Admin</title>
+    <style>
+        :root { --bg: #050505; --card: #111111; --text: #ffffff; --accent: #ff3366; --success: #00ff88; }
+        body { background-color: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; background-image: radial-gradient(circle at 50% 0%, #1a0a0a 0%, #050505 70%); }
+        .container { width: 100%; max-width: 450px; text-align: center; }
+        .logo-box { width: 90px; height: 90px; margin: 0 auto 20px; border-radius: 50%; background: #111; border: 2px solid var(--accent); display: flex; justify-content: center; align-items: center; overflow: hidden; box-shadow: 0 0 30px rgba(255, 51, 102, 0.2); }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
+        h1 { font-size: 26px; font-weight: 800; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 2px; }
+        .subtitle { color: #666; font-size: 12px; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 1px; }
+        .card { background: var(--card); border: 1px solid #222; border-radius: 20px; padding: 40px 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.8); position: relative; overflow: hidden; }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+        .btn { width: 100%; padding: 18px; background: var(--accent); color: #fff; border: none; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { background: #fff; color: #000; box-shadow: 0 0 30px rgba(255,255,255,0.3); }
+        .key-box { display: none; background: #000; padding: 25px 20px; border-radius: 12px; border: 1px dashed var(--success); margin-top: 25px; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .key-label { color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        #finalKey { color: var(--success); font-family: 'Courier New', monospace; font-size: 22px; font-weight: bold; letter-spacing: 2px; word-wrap: break-word; }
+        .timer { display: none; color: #888; font-size: 12px; margin-top: 15px; font-family: monospace; }
+        .timer span { color: var(--accent); font-weight: bold; }
+        .copy-btn { background: transparent; border: 1px solid #333; color: #aaa; padding: 12px; border-radius: 8px; width: 100%; margin-top: 15px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .copy-btn:hover { background: #222; color: #fff; }
+        .footer { margin-top: 40px; color: #333; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="logo-box">
+        <img src="./assets/logo.png" alt="UKM" onerror="this.src='https://via.placeholder.com/90/111/ff3366?text=UKM'">
+    </div>
+    <h1>Master Override</h1>
+    <p class="subtitle">Universal Time-Lock Generator</p>
+    <div class="card">
+        <button class="btn" id="genBtn" onclick="generateMasterKey()">Generate VIP Key</button>
+        <div class="key-box" id="keyBox">
+            <div class="key-label">VIP Access Key</div>
+            <div id="finalKey">WAITING...</div>
+            <button class="copy-btn" onclick="copyKey()">COPY TO CLIPBOARD</button>
+        </div>
+        <div class="timer" id="timerBox">
+            Time left: <span id="countdown">24:00:00</span>
+        </div>
+    </div>
+    <div class="footer">UKM SECURE ADMIN SYSTEM</div>
+</div>
+<script>
+    function generateMasterKey() {
+        const btn = document.getElementById('genBtn');
+        btn.disabled = true;
+        btn.innerText = "GENERATING...";
 
-    # 1. Get Day Seed
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-    move-result-wide v0
-    const-wide/32 v2, 0x5265c00
-    div-long/2addr v0, v2
-    long-to-int v0, v0
+        setTimeout(() => {
+            try {
+                // 1. Get UTC Day Seed
+                const day = Math.floor(Date.now() / 86400000);
+                
+                // 2. Add Salt
+                let state = day + 0x270F; 
+                
+                const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                let result = "VIP-";
 
-    # 2. Add Salt (9999)
-    const/16 v1, 0x270f
-    add-int/2addr v0, v1
+                for (let i = 0; i < 4; i++) {
+                    for (let j = 0; j < 4; j++) {
+                        // 3. Polynomial Hash (Exact Match to Smali)
+                        state = ((state * 31) + 7) & 0x7FFFFFFF;
+                        let idx = state % 32;
+                        result += chars.charAt(idx);
+                    }
+                    if (i < 3) result += "-";
+                }
 
-    # 3. Setup Chars and StringBuilder
-    const-string v1, "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-    new-instance v2, Ljava/lang/StringBuilder;
-    const-string v3, "VIP-"
-    invoke-direct {v2, v3}, Ljava/lang/StringBuilder;-><init>(Ljava/lang/String;)V
+                document.getElementById('finalKey').innerText = result;
+                document.getElementById('keyBox').style.display = "block";
+                document.getElementById('timerBox').style.display = "block";
+                btn.innerText = "KEY GENERATED";
+                
+                startTimer();
+            } catch (e) {
+                document.getElementById('finalKey').innerText = "MATH ERROR";
+                btn.disabled = false;
+                btn.innerText = "TRY AGAIN";
+            }
+        }, 1000);
+    }
 
-    const/4 v3, 0x0
-    :goto_loop1
-    const/4 v4, 0x4
-    if-lt v3, v4, :cond_end
+    function copyKey() {
+        const keyText = document.getElementById('finalKey').innerText;
+        if (keyText === "WAITING...") return;
+        navigator.clipboard.writeText(keyText).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.innerText = "COPIED! ✅";
+            btn.style.color = "#00ff88";
+            btn.style.borderColor = "#00ff88";
+            setTimeout(() => { btn.innerText = "COPY TO CLIPBOARD"; btn.style.color = "#aaa"; btn.style.borderColor = "#333"; }, 2000);
+        });
+    }
 
-    const/4 v5, 0x0
-    :goto_loop2
-    if-lt v5, v4, :cond_dash
+    function startTimer() {
+        const now = new Date();
+        const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+        let countdownEl = document.getElementById('countdown');
 
-    # 4. Polynomial Hash
-    const/16 v6, 0x1f
-    mul-int/2addr v0, v6
-    const/16 v6, 0x7
-    add-int/2addr v0, v6
-    const v6, 0x7fffffff
-    and-int/2addr v0, v6
+        function updateTimer() {
+            const now = new Date();
+            let diff = nextDay.getTime() - now.getTime();
+            if (diff <= 0) {
+                countdownEl.innerText = "EXPIRED";
+                countdownEl.style.color = "#ff3366";
+                return;
+            }
+            let hours = Math.floor(diff / (1000 * 60 * 60));
+            let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            countdownEl.innerText = 
+                String(hours).padStart(2, '0') + ":" + 
+                String(minutes).padStart(2, '0') + ":" + 
+                String(seconds).padStart(2, '0');
+            setTimeout(updateTimer, 1000);
+        }
+        updateTimer();
+    }
 
-    # 5. Modulo 32
-    const v6, 0x20
-    rem-int v6, v0, v6
-
-    invoke-virtual {v1, v6}, Ljava/lang/String;->charAt(I)C
-    move-result v6
-    invoke-virtual {v2, v6}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
-
-    add-int/lit8 v5, v5, 0x1
-    goto :goto_loop2
-
-    :cond_dash
-    const/4 v4, 0x3
-    if-ge v3, v4, :cond_next
-    const-string v4, "-"
-    invoke-virtual {v2, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    :cond_next
-    add-int/lit8 v3, v3, 0x1
-    goto :goto_loop1
-
-    :cond_end
-    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-    move-result-object v0
-    return-object v0
-.end method
+    document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+</body>
+</html>
