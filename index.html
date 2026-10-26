@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UKM | Master Admin</title>
+    <title>MOON LAG VIP | Master Admin</title>
 
     <style>
         :root {
@@ -336,8 +336,8 @@
         >
     </div>
 
-    <h1>Master Override</h1>
-    <p class="subtitle">Universal Time-Lock Generator</p>
+    <h1>MOON LAG VIP</h1>
+    <p class="subtitle">Universal Key Generator</p>
 
     <!-- PASSWORD LOGIN -->
     <section class="card" id="loginPanel">
@@ -376,7 +376,7 @@
         </form>
     </section>
 
-    <!-- ADMIN PANEL: HIDDEN UNTIL LOGIN -->
+    <!-- ADMIN PANEL -->
     <section class="card" id="adminPanel">
         <div class="panel-top">
             <h2 class="section-title">VIP Generator</h2>
@@ -413,7 +413,7 @@
 </div>
 
 <script>
-    // FRONTEND LOGIN GATE ONLY — NOT SERVER-SIDE SECURITY.
+    // Frontend login gate only; not server-side security.
     const ADMIN_PASSWORD = "moonxdeva";
 
     const loginPanel = document.getElementById("loginPanel");
@@ -446,7 +446,6 @@
         if (passwordInput.value === ADMIN_PASSWORD) {
             loginError.style.display = "none";
             passwordInput.value = "";
-
             loginPanel.style.display = "none";
             adminPanel.style.display = "block";
         } else {
@@ -467,7 +466,6 @@
             adminPanel.style.display = "none";
             loginPanel.style.display = "block";
 
-            // Reset the visible panel when logging out.
             generated = false;
             expiryTime = null;
 
@@ -485,7 +483,7 @@
         }
     );
 
-    // EXISTING VIP KEY-GENERATION ALGORITHM
+    // ORIGINAL VIP KEY-GENERATION ALGORITHM
     function generateMasterKey() {
         if (generated) return;
 
@@ -519,12 +517,11 @@
                 document.getElementById("keyBox").style.display = "block";
                 document.getElementById("timerBox").style.display = "block";
 
-                // Start a FULL 24 hours from this generation.
+                // Exactly 24 hours from generation.
                 expiryTime = Date.now() + (24 * 60 * 60 * 1000);
                 generated = true;
 
                 btn.innerText = "KEY GENERATED";
-
                 startTimer();
 
             } catch (error) {
@@ -539,7 +536,7 @@
         "click", generateMasterKey
     );
 
-    // TRUE 24-HOUR COUNTDOWN — NOT A MIDNIGHT COUNTDOWN
+    // TRUE 24-HOUR COUNTDOWN
     function startTimer() {
         if (timerInterval !== null) {
             clearInterval(timerInterval);
@@ -558,7 +555,6 @@
                 return;
             }
 
-            // Total hours can be 24; do not wrap at midnight.
             const totalSeconds = Math.ceil(remaining / 1000);
             const hours = Math.floor(totalSeconds / 3600);
             const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -600,7 +596,7 @@
         }
     );
 
-    // Retain the original right-click behavior.
+    // Retain original right-click behavior.
     document.addEventListener("contextmenu", event => {
         event.preventDefault();
     });
